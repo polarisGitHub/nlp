@@ -21,4 +21,5 @@ class Word:
     def __iter__(self):
         for file in self.files:
             for line in codecs.open(file, "r", encoding="utf-8"):
-                yield [item for item in line if item.strip() != ""]
+                words = [item for item in jieba.cut(line) if item.strip() != ""]
+                yield words
