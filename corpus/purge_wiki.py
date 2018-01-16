@@ -23,8 +23,8 @@ for file in os.listdir("./data/wiki"):
     if file.startswith("wiki"):
         files.append(file)
 
-for f in files:
-    with codecs.open("./data/corpus_wiki", "w", encoding="utf-8") as extract:
+with codecs.open("./data/corpus_wiki", "w", encoding="utf-8") as extract:
+    for f in files:
         with codecs.open("./data/wiki/" + f, "r", encoding='utf-8') as file:
             for line in file:
                 # 去除xml标记和空行
