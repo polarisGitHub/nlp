@@ -7,7 +7,7 @@ from utils import full_half_converter
 # http://www.sogou.com/labs/resource/cs.php
 files = ["./data/news_sohusite_xml.dat", "./data/news_tensite_xml.dat"]
 
-with codecs.open("./data/purge_sougo", "w", encoding="utf-8") as extracted:
+with codecs.open("./data/sougo", "w", encoding="utf-8") as extracted:
     for file in files:
         with codecs.open(file, "r", encoding="GB18030") as reader:
             while True:
