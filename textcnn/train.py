@@ -13,14 +13,14 @@ from tensorflow.contrib import learn
 # ==================================================
 
 # Data loading params
-tf.flags.DEFINE_float("dev_sample_percentage", .2, "Percentage of the training data to use for validation")
-tf.flags.DEFINE_string("train_file", "./data/2018_01_02_all_train_data.csv", "Data source for the train.")
+tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
+tf.flags.DEFINE_string("train_file", "./data/train.csv", "Data source for the train.")
 tf.flags.DEFINE_string("num_class", 107, "num class.")
 
 # Model Hyperparameters
-tf.flags.DEFINE_integer("embedding_dim", 64, "Dimensionality of character embedding (default: 128)")
-tf.flags.DEFINE_string("filter_sizes", "1,3,5", "Comma-separated filter sizes (default: '1,3,5')")
-tf.flags.DEFINE_integer("num_filters", 128, "Number of filters per filter size (default: 128)")
+tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
+tf.flags.DEFINE_string("filter_sizes", "1,2,3,4,5,6,7", "Comma-separated filter sizes (default: '1,3,5')")
+tf.flags.DEFINE_integer("num_filters", 256, "Number of filters per filter size (default: 128)")
 tf.flags.DEFINE_float("dropout_keep_prob", 0.7, "Dropout keep probability (default: 0.7)")
 tf.flags.DEFINE_float("l2_reg_lambda", 0.0, "L2 regularization lambda (default: 0.0)")
 
@@ -52,8 +52,8 @@ x_text, y = data_helpers.load_data_and_labels(FLAGS.train_file, FLAGS.num_class)
 # Build vocabulary
 max_document_length = max([len(x.split(" ")) for x in x_text])
 
-# vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
-# x = np.array(list(vocab_processor.fit_transform(x_text)))
+vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
+x = np.array(list(vocab_processor.fit_transform(x_text)))
 
 # Randomly shuffle data
 np.random.seed(10)
