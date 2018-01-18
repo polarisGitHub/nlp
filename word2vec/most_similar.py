@@ -2,5 +2,5 @@
 
 import gensim
 
-model = gensim.models.Word2Vec.load("data/model")
-print(model.most_similar("1"))
+model = gensim.models.Word2Vec.load("data/corpus.model")
+print(model.most_similar("unk"))
