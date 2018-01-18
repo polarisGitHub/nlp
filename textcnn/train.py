@@ -13,14 +13,14 @@ from tensorflow.contrib import learn
 # ==================================================
 
 # Data loading params
-tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
-tf.flags.DEFINE_string("train_file", "./data/train.csv", "Data source for the train.")
-tf.flags.DEFINE_string("num_class", 107, "num class.")
+tf.flags.DEFINE_float("dev_sample_percentage", .2, "Percentage of the training data to use for validation")
+tf.flags.DEFINE_string("train_file", "./data/j_train.csv", "Data source for the train.")
+tf.flags.DEFINE_integer("num_class", 143, "num class.")
 
 # Model Hyperparameters
 tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
-tf.flags.DEFINE_string("filter_sizes", "1,2,3,4,5,6,7", "Comma-separated filter sizes (default: '1,3,5')")
-tf.flags.DEFINE_integer("num_filters", 256, "Number of filters per filter size (default: 128)")
+tf.flags.DEFINE_string("filter_sizes", "1,3,5", "Comma-separated filter sizes (default: '1,3,5')")
+tf.flags.DEFINE_integer("num_filters", 128, "Number of filters per filter size (default: 128)")
 tf.flags.DEFINE_float("dropout_keep_prob", 0.7, "Dropout keep probability (default: 0.7)")
 tf.flags.DEFINE_float("l2_reg_lambda", 0.0, "L2 regularization lambda (default: 0.0)")
 
