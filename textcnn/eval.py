@@ -4,7 +4,8 @@ import tensorflow as tf
 import numpy as np
 import os
 import time
-import datetime
+import datet
+import codecs
 import data_helpers
 from text_cnn import TextCNN
 from tensorflow.contrib import learn
@@ -19,7 +20,7 @@ tf.flags.DEFINE_integer("num_class", 107, "num class.")
 
 # Eval Parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_string("checkpoint_dir", "", "Checkpoint directory from training run")
+tf.flags.DEFINE_string("checkpoint_dir", "runs/1516278568/checkpoints", "Checkpoint directory from training run")
 tf.flags.DEFINE_boolean("eval_train", False, "Evaluate on all training data")
 
 # Misc Parameters
@@ -92,7 +93,7 @@ def main(_):
     predictions_human_readable = np.column_stack((np.array(x_raw), all_predictions))
     out_path = os.path.join(FLAGS.checkpoint_dir, "..", "prediction.csv")
     print("Saving evaluation to {0}".format(out_path))
-    with open(out_path, 'w') as f:
+    with codecs.open(out_path, 'w', encoding="utf-8") as f:
         csv.writer(f).writerows(predictions_human_readable)
 
 
