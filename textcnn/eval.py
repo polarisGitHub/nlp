@@ -15,7 +15,7 @@ import csv
 
 # Data Parameters
 tf.flags.DEFINE_string("test_file", "./data/test.csv", "Data source for the train.")
-tf.flags.DEFINE_string("num_class", 107, "num class.")
+tf.flags.DEFINE_integer("num_class", 107, "num class.")
 
 # Eval Parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
