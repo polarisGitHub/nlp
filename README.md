@@ -1,4 +1,21 @@
 # nlp
-- 1.字/词向量
+- word2vec
     - 安装***gensim***
     - 安装cython，可以加快训练速度
+    - 预处理
+        - 去除无用行
+        - 去除明显无用的重复语料
+        - 使用preprocess.py，处理出__UNK__
+- segmentation
+    - 中文分词
+- ner
+    - 实体识别
+- fasttext
+    - 使用fasttext进行文本分类
+    - 语料格式，之后所有文本分类都采用这种格式
+        - 我 爱 北京 天安门 __label__0
+- textcnn
+    - 使用textcnn进行文本分类
+- textrcnn
+    - 使用textrcnn进行文本分类
+    - 需要安装tflearn
