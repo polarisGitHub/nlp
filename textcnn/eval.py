@@ -3,8 +3,6 @@
 import tensorflow as tf
 import numpy as np
 import os
-import time
-import datet
 import codecs
 import data_helpers
 from text_cnn import TextCNN
@@ -15,12 +13,12 @@ import csv
 # ==================================================
 
 # Data Parameters
-tf.flags.DEFINE_string("test_file", "./data/test.csv", "Data source for the train.")
+tf.flags.DEFINE_string("test_file", "./data/train_all.csv", "Data source for the train.")
 tf.flags.DEFINE_integer("num_class", 107, "num class.")
 
 # Eval Parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_string("checkpoint_dir", "runs/1516278568/checkpoints", "Checkpoint directory from training run")
+tf.flags.DEFINE_string("checkpoint_dir", "runs/1516629960/checkpoints", "Checkpoint directory from training run")
 tf.flags.DEFINE_boolean("eval_train", False, "Evaluate on all training data")
 
 # Misc Parameters
@@ -41,8 +39,7 @@ def main(_):
         x_raw, y_test = data_helpers.load_data_and_labels(FLAGS.test_file, FLAGS.num_class)
         y_test = np.argmax(y_test, axis=1)
     else:
-        x_raw = ["a masterpiece four years in the making", "everything is off."]
-        y_test = [1, 0]
+        x_raw = ["你们 的 中信 visa 联名卡 是不是 没有 年费"]
 
     # Map data into vocabulary
     vocab_path = os.path.join(FLAGS.checkpoint_dir, "..", "vocab")
@@ -84,7 +81,7 @@ def main(_):
                 all_predictions = np.concatenate([all_predictions, batch_predictions])
 
     # Print accuracy if y_test is defined
-    if y_test is not None:
+    if FLAGS.eval_train and y_test is not None:
         correct_predictions = float(sum(all_predictions == y_test))
         print("Total number of test examples: {}".format(len(y_test)))
         print("Accuracy: {:g}".format(correct_predictions / float(len(y_test))))
@@ -93,8 +90,11 @@ def main(_):
     predictions_human_readable = np.column_stack((np.array(x_raw), all_predictions))
     out_path = os.path.join(FLAGS.checkpoint_dir, "..", "prediction.csv")
     print("Saving evaluation to {0}".format(out_path))
-    with codecs.open(out_path, 'w', encoding="utf-8") as f:
-        csv.writer(f).writerows(predictions_human_readable)
+    if FLAGS.eval_train:
+        with codecs.open(out_path, 'w', encoding="utf-8") as f:
+            csv.writer(f).writerows(predictions_human_readable)
+    else:
+        print(predictions_human_readable)
 
 
 if __name__ == "__main__":
