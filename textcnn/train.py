@@ -52,7 +52,7 @@ def main(_):
     x_text, y = data_helpers.load_data_and_labels(FLAGS.train_file, FLAGS.num_class)
 
     # Build vocabulary
-    max_document_length = max([len(x.split(" ")) for x in x_text])
+    max_document_length = 64
 
     vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
     x = np.array(list(vocab_processor.fit_transform(x_text)))
