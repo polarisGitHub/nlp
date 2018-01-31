@@ -33,7 +33,9 @@ word_cut = WordCut(user_dict=options.user_dict, stop_dict=options.stop_dict)
 with codecs.open(options.input, "r", encoding="utf-8") as r:
     with codecs.open(options.output, "w", encoding="utf-8") as w:
         for line in r:
-            w.write(" ".join(word_cut.seg(line)))
+            seg = " ".join(word_cut.seg(line))
+            if seg != "":
+                w.write(seg)
             index += 1
             if index % 500 == 0:
                 print(index)
