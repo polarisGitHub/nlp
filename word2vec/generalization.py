@@ -1,11 +1,27 @@
 # -*- coding: utf-8 -*-
 
 import re
+import codecs
+from optparse import OptionParser
+
+parser = OptionParser("usage: %prog [options] arg1 arg2")
+parser.add_option("-i", "--input",
+                  dest="input",
+                  default="",
+                  help="input file")
+parser.add_option("-o", "--output",
+                  dest="output",
+                  default="",
+                  help="output file")
+(options, args) = parser.parse_args()
+if options.input == "":
+    parser.error("input is empty")
+if options.output == "":
+    parser.error("output is empty")
 
 # name
 # datetime
 # address
-
 regexes = {
     re.compile("(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]"): "__URL__",
     re.compile("\d{17}[\d|x]|\d{15}"): "__IDCARD__",
@@ -23,3 +39,12 @@ def replace(text):
     for patten, token in regexes.items():
         text = patten.sub(token, text)
     return text
+
+
+index = 0
+with codecs.open(options.input, "r", encoding="utf-8") as r:
+    with codecs.open(options.output, "w", encoding="utf-8") as w:
+        for line in r:
+            w.write(replace(line))
+            index += 1
+            print(index)
