@@ -5,6 +5,7 @@ import codecs
 class WordCut(object):
     def __init__(self, user_dict=None, stop_dict=None):
         self.jieba = jieba
+        self.jieba.enable_parallel()
         if user_dict is not None:
             self.user_dict = user_dict
             for user_dict in user_dict.split(","):
