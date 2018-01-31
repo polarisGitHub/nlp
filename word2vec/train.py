@@ -22,7 +22,7 @@ parser.add_option("-m", "--model",
 
 if options.input == "":
     parser.model("input is empty")
-if options.word == "":
+if options.model == "":
     parser.error("model is empty")
 
 word = pipe_line.SplitWord([options.input])
@@ -30,3 +30,4 @@ word = pipe_line.SplitWord([options.input])
 # 输入是带__UNK__的，min_count设为1
 model = gensim.models.Word2Vec(word, min_count=1, sg=1, hs=1, size=128, workers=cpu_count())
 model.save(options.model)
+model.wv.save_word2vec_format(options.model + ".txt", binary=False)
