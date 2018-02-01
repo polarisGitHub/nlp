@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import gensim
+from gensim.models.keyedvectors import KeyedVectors
 from optparse import OptionParser
 
 parser = OptionParser("usage: %prog [options] arg1 arg2")
@@ -19,5 +19,5 @@ if options.model == "":
 if options.word == "":
     parser.error("word is empty")
 
-model = gensim.models.Word2Vec.load(options.model)
-print(model.most_similar(options.word))
+word_vectors = KeyedVectors.load_word2vec_format(options.model, binary=False)
+print(word_vectors.most_similar(options.word))
