@@ -5,6 +5,7 @@ import numpy as np
 import os
 import time
 import datetime
+from gensim.models.keyedvectors import KeyedVectors
 import data_helpers
 from text_cnn import TextCNN
 from tensorflow.contrib import learn
@@ -13,15 +14,18 @@ from tensorflow.contrib import learn
 # ==================================================
 
 # Data loading params
-tf.flags.DEFINE_float("dev_sample_percentage", .2, "Percentage of the training data to use for validation")
-tf.flags.DEFINE_string("train_file", "./data/j_train.csv", "Data source for the train.")
-tf.flags.DEFINE_integer("num_class", 143, "num class.")
+tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
+tf.flags.DEFINE_string("train_file", "./data/train_pading.csv", "Data source for the train.")
+tf.flags.DEFINE_integer("num_class", 108, "num class.")
+tf.flags.DEFINE_string("embedding_type", "none-static", "random or none-static")
+tf.flags.DEFINE_string("word2vec_model", "./model/train.txt", "word2vec_model which train with gensim")
+tf.flags.DEFINE_integer("max_length", 64, "sentence max_length")
 
 # Model Hyperparameters
 tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
 tf.flags.DEFINE_string("filter_sizes", "1,3,5", "Comma-separated filter sizes (default: '1,3,5')")
-tf.flags.DEFINE_integer("num_filters", 128, "Number of filters per filter size (default: 128)")
-tf.flags.DEFINE_float("dropout_keep_prob", 0.7, "Dropout keep probability (default: 0.7)")
+tf.flags.DEFINE_integer("num_filters", 100, "Number of filters per filter size (default: 100)")
+tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (default: 0.7)")
 tf.flags.DEFINE_float("l2_reg_lambda", 0.0, "L2 regularization lambda (default: 0.0)")
 
 # Training parameters
@@ -39,10 +43,10 @@ FLAGS = tf.flags.FLAGS
 
 def main(_):
     # FLAGS._parse_flags()
-    print("\nParameters:")
-    for attr, value in sorted(FLAGS.__flags.items()):
-        print("{}={}".format(attr.upper(), value))
-    print("")
+    # print("\nParameters:")
+    # for attr, value in sorted(FLAGS.items()):
+    #     print("{}={}".format(attr.upper(), value))
+    # print("")
 
     # Data Preparation
     # ==================================================
@@ -52,10 +56,22 @@ def main(_):
     x_text, y = data_helpers.load_data_and_labels(FLAGS.train_file, FLAGS.num_class)
 
     # Build vocabulary
-    max_document_length = 64
+    if FLAGS.embedding_type == "random":
+        vocab_processor = learn.preprocessing.VocabularyProcessor(FLAGS.max_length)
+        x = np.array(list(vocab_processor.fit_transform(x_text)))
+        print("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
+    elif FLAGS.embedding_type == "none-static":
+        x, w2v = [], KeyedVectors.load_word2vec_format(FLAGS.word2vec_model, binary=False)
+        vocab, embeddings = w2v.vocab, np.zeros((len(w2v.index2word), w2v.vector_size), dtype=np.float32)
 
-    vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
-    x = np.array(list(vocab_processor.fit_transform(x_text)))
+        for k, v in vocab.items():
+            embeddings[v.index] = w2v[k]
+        for item in x_text:
+            x.append([vocab[word].index if word in vocab else vocab["__UNK__"].index for word in item.split(" ")])
+        x = np.array(x, dtype=np.int32)
+        print("Vocabulary Size: {:d}".format(len(vocab)))
+    else:
+        raise RuntimeError("embedding_type is random or none-static")
 
     # Randomly shuffle data
     np.random.seed(10)
@@ -71,7 +87,6 @@ def main(_):
 
     del x, y, x_shuffled, y_shuffled
 
-    print("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
     print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
 
     # Training
@@ -83,14 +98,24 @@ def main(_):
             log_device_placement=FLAGS.log_device_placement)
         sess = tf.Session(config=session_conf)
         with sess.as_default():
-            cnn = TextCNN(
-                sequence_length=x_train.shape[1],
-                num_classes=y_train.shape[1],
-                vocab_size=len(vocab_processor.vocabulary_),
-                embedding_size=FLAGS.embedding_dim,
-                filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
-                num_filters=FLAGS.num_filters,
-                l2_reg_lambda=FLAGS.l2_reg_lambda)
+            if FLAGS.embedding_type == "random":
+                cnn = TextCNN(
+                    sequence_length=FLAGS.max_length,
+                    num_classes=FLAGS.num_class,
+                    vocab_size=len(vocab_processor.vocabulary_),
+                    embedding_size=FLAGS.embedding_dim,
+                    filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
+                    num_filters=FLAGS.num_filters,
+                    l2_reg_lambda=FLAGS.l2_reg_lambda)
+            elif FLAGS.embedding_type == "none-static":
+                cnn = TextCNN(
+                    sequence_length=FLAGS.max_length,
+                    num_classes=FLAGS.num_class,
+                    embedding=embeddings,
+                    embedding_size=embeddings.shape[1],
+                    filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
+                    num_filters=FLAGS.num_filters,
+                    l2_reg_lambda=FLAGS.l2_reg_lambda)
 
             # Define Training procedure
             global_step = tf.Variable(0, name="global_step", trainable=False)
@@ -135,7 +160,8 @@ def main(_):
             saver = tf.train.Saver(tf.global_variables(), max_to_keep=FLAGS.num_checkpoints)
 
             # Write vocabulary
-            vocab_processor.save(os.path.join(out_dir, "vocab"))
+            if FLAGS.embedding_type == "random":
+                vocab_processor.save(os.path.join(out_dir, "vocab"))
 
             # Initialize all variables
             sess.run(tf.global_variables_initializer())
