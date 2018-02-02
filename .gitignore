@@ -5,3 +5,5 @@ data/
 .DS_Store
 textcnn/runs/
 model/
+dict/
+textrnn/runs/
