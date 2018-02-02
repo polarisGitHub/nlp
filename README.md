@@ -16,6 +16,10 @@
         - 我 爱 北京 天安门 __label__0
 - textcnn
     - 使用textcnn进行文本分类
+    - 使用random-embedding, none-static-embedding
 - textrcnn
     - 使用textrcnn进行文本分类
     - 需要安装tflearn
+- bayes
+    - 采用朴素贝叶斯进行文本分类
+    - 需要安装sklearn
