@@ -3,22 +3,21 @@ import gensim
 import logging
 import pipe_line
 from optparse import OptionParser
-from multiprocessing import cpu_count
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 parser = OptionParser("usage: %prog [options] arg1 arg2")
 parser.add_option("-i", "--input",
                   dest="input",
-                  default="data/2",
+                  default="",
                   help="input file")
 parser.add_option("-o", "--old_model",
                   dest="old_model",
-                  default="1",
+                  default="",
                   help="old model to update")
 parser.add_option("-n", "--new_model",
                   dest="new_model",
-                  default="2",
+                  default="",
                   help="new model to train")
 (options, args) = parser.parse_args()
 
