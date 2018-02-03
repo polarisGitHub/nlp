@@ -29,6 +29,7 @@ if options.input == "":
 if options.output == "":
     parser.error("output is empty")
 
+options.min_count = int(options.min_count)
 # 统计词频
 lines = 0
 counter = collections.Counter()
