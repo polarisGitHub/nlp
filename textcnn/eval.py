@@ -16,11 +16,12 @@ import csv
 # Data Parameters
 tf.flags.DEFINE_string("test_file", "./data/test_padding.csv", "Data source for the train.")
 tf.flags.DEFINE_integer("num_class", 108, "num class.")
-tf.flags.DEFINE_string("embedding_type", "random", "random or none-static")
+tf.flags.DEFINE_string("embedding_type", "none-static", "random or none-static")
+tf.flags.DEFINE_string("word2vec_model", "", "word2vec_model which train with gensim")
 
 # Eval Parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_string("checkpoint_dir", "runs/1517759592/checkpoints", "Checkpoint directory from training run")
+tf.flags.DEFINE_string("checkpoint_dir", "", "Checkpoint directory from training run")
 tf.flags.DEFINE_boolean("eval_train", True, "Evaluate on all training data")
 
 # Misc Parameters
@@ -51,10 +52,8 @@ def main(_):
         x_test = np.array(list(vocab_processor.transform(x_raw)))
     elif FLAGS.embedding_type == "none-static":
         x, w2v = [], KeyedVectors.load_word2vec_format(FLAGS.word2vec_model, binary=False)
-        vocab, embeddings = w2v.vocab, np.zeros((len(w2v.index2word), w2v.vector_size), dtype=np.float32)
-
-        for k, v in vocab.items():
-            embeddings[v.index] = w2v[k]
+        print("loading word vec done")
+        vocab = w2v.vocab
         for item in x_raw:
             x.append([vocab[word].index if word in vocab else vocab["__UNK__"].index for word in item.split(" ")])
             x_test = np.array(x, dtype=np.int32)
