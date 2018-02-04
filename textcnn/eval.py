@@ -56,7 +56,7 @@ def main(_):
         vocab = w2v.vocab
         for item in x_raw:
             x.append([vocab[word].index if word in vocab else vocab["__UNK__"].index for word in item.split(" ")])
-            x_test = np.array(x, dtype=np.int32)
+        x_test = np.array(x, dtype=np.int32)
     else:
         raise RuntimeError("embedding_type is random or none-static")
 
