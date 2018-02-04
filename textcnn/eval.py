@@ -4,6 +4,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import codecs
+from gensim.models.keyedvectors import KeyedVectors
 import data_helpers
 from text_cnn import TextCNN
 from tensorflow.contrib import learn
@@ -13,13 +14,14 @@ import csv
 # ==================================================
 
 # Data Parameters
-tf.flags.DEFINE_string("test_file", "./data/train_all.csv", "Data source for the train.")
-tf.flags.DEFINE_integer("num_class", 107, "num class.")
+tf.flags.DEFINE_string("test_file", "./data/test_padding.csv", "Data source for the train.")
+tf.flags.DEFINE_integer("num_class", 108, "num class.")
+tf.flags.DEFINE_string("embedding_type", "random", "random or none-static")
 
 # Eval Parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_string("checkpoint_dir", "runs/1516629960/checkpoints", "Checkpoint directory from training run")
-tf.flags.DEFINE_boolean("eval_train", False, "Evaluate on all training data")
+tf.flags.DEFINE_string("checkpoint_dir", "runs/1517759592/checkpoints", "Checkpoint directory from training run")
+tf.flags.DEFINE_boolean("eval_train", True, "Evaluate on all training data")
 
 # Misc Parameters
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
@@ -29,10 +31,10 @@ FLAGS = tf.flags.FLAGS
 
 
 def main(_):
-    print("\nParameters:")
-    for attr, value in sorted(FLAGS.__flags.items()):
-        print("{}={}".format(attr.upper(), value))
-    print("")
+    # print("\nParameters:")
+    # for attr, value in sorted(FLAGS.__flags.items()):
+    #     print("{}={}".format(attr.upper(), value))
+    # print("")
 
     # CHANGE THIS: Load data. Load your own data here
     if FLAGS.eval_train:
@@ -41,10 +43,23 @@ def main(_):
     else:
         x_raw = ["你们 的 中信 visa 联名卡 是不是 没有 年费"]
 
-    # Map data into vocabulary
-    vocab_path = os.path.join(FLAGS.checkpoint_dir, "..", "vocab")
-    vocab_processor = learn.preprocessing.VocabularyProcessor.restore(vocab_path)
-    x_test = np.array(list(vocab_processor.transform(x_raw)))
+    # Build vocabulary
+    if FLAGS.embedding_type == "random":
+        # Map data into vocabulary
+        vocab_path = os.path.join(FLAGS.checkpoint_dir, "..", "vocab")
+        vocab_processor = learn.preprocessing.VocabularyProcessor.restore(vocab_path)
+        x_test = np.array(list(vocab_processor.transform(x_raw)))
+    elif FLAGS.embedding_type == "none-static":
+        x, w2v = [], KeyedVectors.load_word2vec_format(FLAGS.word2vec_model, binary=False)
+        vocab, embeddings = w2v.vocab, np.zeros((len(w2v.index2word), w2v.vector_size), dtype=np.float32)
+
+        for k, v in vocab.items():
+            embeddings[v.index] = w2v[k]
+        for item in x_raw:
+            x.append([vocab[word].index if word in vocab else vocab["__UNK__"].index for word in item.split(" ")])
+            x_test = np.array(x, dtype=np.int32)
+    else:
+        raise RuntimeError("embedding_type is random or none-static")
 
     print("\nEvaluating...\n")
 
