@@ -5,5 +5,5 @@ data/
 .DS_Store
 text_classfication/textcnn/runs/
 model/
-dict/
+user.dict
 text_classfication/textrnn/runs/
