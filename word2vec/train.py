@@ -12,11 +12,11 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 parser = OptionParser("usage: %prog [options] arg1 arg2")
 parser.add_option("-i", "--input",
                   dest="input",
-                  default="data/1",
+                  default="",
                   help="input file")
 parser.add_option("-m", "--model",
                   dest="model",
-                  default="1",
+                  default="",
                   help="save model")
 (options, args) = parser.parse_args()
 
