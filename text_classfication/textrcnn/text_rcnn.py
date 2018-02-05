@@ -60,9 +60,9 @@ class TextRCNN:
             self.Embedding = tf.get_variable("Embedding", shape=[self.vocab_size, self.embed_size],
                                              initializer=self.initializer)  # [vocab_size,embed_size] tf.random_uniform([self.vocab_size, self.embed_size],-1.0,1.0)
 
-            self.left_side_first_word = tf.get_variable("left_side_first_word",
-                                                        shape=[self.batch_size, self.embed_size],
-                                                        initializer=self.initializer)  # TODO
+            self.left_side_first_word = tf.get_variable(
+
+            )  # TODO
             self.right_side_last_word = tf.get_variable("right_side_last_word",
                                                         shape=[self.batch_size, self.embed_size],
                                                         initializer=self.initializer)  # TODO
