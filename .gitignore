@@ -3,7 +3,7 @@
 __pycache__/
 data/
 .DS_Store
-textcnn/runs/
+text_classfication/textcnn/runs/
 model/
 dict/
-textrnn/runs/
+text_classfication/textrnn/runs/
