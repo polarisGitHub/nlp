@@ -86,17 +86,17 @@ def main(_):
 
             # Collect the predictions here
             all_predictions = []
-            all_softmax = []
+            all_softmax = [[0] * FLAGS.num_class]
             for x_test_batch in batches:
                 batch_softmax, batch_predictions = sess.run([softmax, predictions],
                                                             feed_dict={input_x: x_test_batch, dropout_keep_prob: 1.0})
                 all_predictions = np.concatenate([all_predictions, batch_predictions])
+                all_softmax = np.concatenate([all_softmax, batch_softmax])
 
-                all_softmax_str = map(
-                    lambda l: np.array2string(l, precision=4, suppress_small=True, separator=',',
-                                              max_line_width=20000).replace("[", "").replace("]", ""),
-                    batch_softmax)
-                all_softmax = np.concatenate([all_softmax, list(all_softmax_str)])
+    print("\nEvaluating done...\n")
+    all_softmax_str = map(lambda l: np.array2string(l, precision=4, suppress_small=True, separator=',',
+                                                    max_line_width=20000)[1:-1],
+                          all_softmax[1:])
 
     # Print accuracy if y_test is defined
     correct_predictions = float(sum(all_predictions == y_test))
@@ -111,7 +111,7 @@ def main(_):
         csv.writer(f).writerows(predictions_human_readable)
 
     # Save the softmax to a csv
-    softmax_human_readable = np.column_stack((np.array(x_raw), all_softmax))
+    softmax_human_readable = np.column_stack((np.array(x_raw), list(all_softmax_str)))
     out_path = os.path.join(FLAGS.checkpoint_dir, "..", "softmax.csv")
     print("Saving softmax to {0}".format(out_path))
     with codecs.open(out_path, 'w', encoding="utf-8") as f:
