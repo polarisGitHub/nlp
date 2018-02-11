@@ -16,13 +16,12 @@ import csv
 # Data Parameters
 tf.flags.DEFINE_string("test_file", "./data/test_padding.csv", "Data source for the train.")
 tf.flags.DEFINE_integer("num_class", 108, "num class.")
-tf.flags.DEFINE_string("embedding_type", "none-static", "random or none-static")
+tf.flags.DEFINE_string("embedding_type", "random", "random or none-static")
 tf.flags.DEFINE_string("word2vec_model", "", "word2vec_model which train with gensim")
 
 # Eval Parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_string("checkpoint_dir", "", "Checkpoint directory from training run")
-tf.flags.DEFINE_boolean("eval_train", True, "Evaluate on all training data")
+tf.flags.DEFINE_string("checkpoint_dir", "runs/1518353084/checkpoints", "Checkpoint directory from training run")
 
 # Misc Parameters
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
@@ -38,11 +37,8 @@ def main(_):
     # print("")
 
     # CHANGE THIS: Load data. Load your own data here
-    if FLAGS.eval_train:
-        x_raw, y_test = data_helpers.load_data_and_labels(FLAGS.test_file, FLAGS.num_class)
-        y_test = np.argmax(y_test, axis=1)
-    else:
-        x_raw = ["你们 的 中信 visa 联名卡 是不是 没有 年费"]
+    x_raw, y_test = data_helpers.load_data_and_labels(FLAGS.test_file, FLAGS.num_class)
+    y_test = np.argmax(y_test, axis=1)
 
     # Build vocabulary
     if FLAGS.embedding_type == "random":
@@ -83,32 +79,43 @@ def main(_):
 
             # Tensors we want to evaluate
             predictions = graph.get_operation_by_name("output/predictions").outputs[0]
+            softmax = graph.get_operation_by_name("output/softmax").outputs[0]
 
             # Generate batches for one epoch
             batches = data_helpers.batch_iter(list(x_test), FLAGS.batch_size, 1, shuffle=False)
 
             # Collect the predictions here
             all_predictions = []
-
+            all_softmax = []
             for x_test_batch in batches:
-                batch_predictions = sess.run(predictions, {input_x: x_test_batch, dropout_keep_prob: 1.0})
+                batch_softmax, batch_predictions = sess.run([softmax, predictions],
+                                                            feed_dict={input_x: x_test_batch, dropout_keep_prob: 1.0})
                 all_predictions = np.concatenate([all_predictions, batch_predictions])
 
+                all_softmax_str = map(
+                    lambda l: np.array2string(l, precision=4, suppress_small=True, separator=',',
+                                              max_line_width=20000).replace("[", "").replace("]", ""),
+                    batch_softmax)
+                all_softmax = np.concatenate([all_softmax, list(all_softmax_str)])
+
     # Print accuracy if y_test is defined
-    if FLAGS.eval_train and y_test is not None:
-        correct_predictions = float(sum(all_predictions == y_test))
-        print("Total number of test examples: {}".format(len(y_test)))
-        print("Accuracy: {:g}".format(correct_predictions / float(len(y_test))))
+    correct_predictions = float(sum(all_predictions == y_test))
+    print("Total number of test examples: {}".format(len(y_test)))
+    print("Accuracy: {:g}".format(correct_predictions / float(len(y_test))))
 
     # Save the evaluation to a csv
     predictions_human_readable = np.column_stack((np.array(x_raw), all_predictions))
     out_path = os.path.join(FLAGS.checkpoint_dir, "..", "prediction.csv")
     print("Saving evaluation to {0}".format(out_path))
-    if FLAGS.eval_train:
-        with codecs.open(out_path, 'w', encoding="utf-8") as f:
-            csv.writer(f).writerows(predictions_human_readable)
-    else:
-        print(predictions_human_readable)
+    with codecs.open(out_path, 'w', encoding="utf-8") as f:
+        csv.writer(f).writerows(predictions_human_readable)
+
+    # Save the softmax to a csv
+    softmax_human_readable = np.column_stack((np.array(x_raw), all_softmax))
+    out_path = os.path.join(FLAGS.checkpoint_dir, "..", "softmax.csv")
+    print("Saving softmax to {0}".format(out_path))
+    with codecs.open(out_path, 'w', encoding="utf-8") as f:
+        csv.writer(f).writerows(softmax_human_readable)
 
 
 if __name__ == "__main__":

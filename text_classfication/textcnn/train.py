@@ -14,26 +14,26 @@ from tensorflow.contrib import learn
 # ==================================================
 
 # Data loading params
-tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
+tf.flags.DEFINE_float("dev_sample_percentage", .05, "Percentage of the training data to use for validation")
 tf.flags.DEFINE_string("train_file", "./data/train_padding.csv", "Data source for the train.")
 tf.flags.DEFINE_integer("num_class", 108, "num class.")
-tf.flags.DEFINE_string("embedding_type", "none-static", "random or none-static")
-tf.flags.DEFINE_string("word2vec_model", "./model/1.txt", "word2vec_model which train with gensim")
+tf.flags.DEFINE_string("embedding_type", "random", "random or none-static")
+tf.flags.DEFINE_string("word2vec_model", "", "word2vec_model which train with gensim")
 tf.flags.DEFINE_integer("max_length", 64, "sentence max_length")
 
 # Model Hyperparameters
 tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
-tf.flags.DEFINE_string("filter_sizes", "1,3,5", "Comma-separated filter sizes (default: '1,3,5')")
+tf.flags.DEFINE_string("filter_sizes", "2,3,4", "Comma-separated filter sizes (default: '2,3,4')")
 tf.flags.DEFINE_integer("num_filters", 100, "Number of filters per filter size (default: 100)")
 tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (default: 0.7)")
 tf.flags.DEFINE_float("l2_reg_lambda", 0.0, "L2 regularization lambda (default: 0.0)")
 
 # Training parameters
-tf.flags.DEFINE_integer("batch_size", 32, "Batch Size (default: 64)")
+tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 tf.flags.DEFINE_integer("num_epochs", 200, "Number of training epochs (default: 200)")
 tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
-tf.flags.DEFINE_integer("num_checkpoints", 5, "Number of checkpoints to store (default: 5)")
+tf.flags.DEFINE_integer("num_checkpoints", 1, "Number of checkpoints to store (default: 5)")
 # Misc Parameters
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
 tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
