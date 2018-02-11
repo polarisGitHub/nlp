@@ -22,7 +22,7 @@ parser.add_option("-n", "--new_model",
 (options, args) = parser.parse_args()
 
 if options.input == "":
-    parser.model("input is empty")
+    parser.error("input is empty")
 if options.old_model == "":
     parser.error("old_model is empty")
 if options.new_model == "":
