@@ -2,9 +2,25 @@
 
 import numpy as np
 import pandas as pd
+from optparse import OptionParser
+
+parser = OptionParser("usage: %prog [options] arg1 arg2")
+parser.add_option("-s", "--softmax",
+                  dest="softmax",
+                  default="",
+                  help="input file")
+parser.add_option("-t", "--test",
+                  dest="test",
+                  default="",
+                  help="test file")
+
+(options, args) = parser.parse_args()
+if options.softmax == "":
+    parser.error("softmax is empty")
+if options.test == "":
+    parser.error("test is empty")
 
 predict_top_k = 3
-softmax_file = "textcnn/runs/1518353084/softmax.csv"
 
 
 def convert_label_to_int(label):
@@ -29,12 +45,12 @@ def vague_predict(actual, softmax):
 
 
 # read test data
-test_csv = pd.read_csv("textcnn/data/test.csv", sep="\t", header=None)
+test_csv = pd.read_csv(options.test, sep="\t", header=None)
 test_sentence = test_csv[0]
 test_label = test_csv[1]
 
 # read softmax
-softmax_csv = pd.read_csv(softmax_file, sep=",", header=None)
+softmax_csv = pd.read_csv(options.softmax, sep=",", header=None)
 test_softmax = list(map(lambda l: np.fromstring(l, dtype=np.float16, sep=","), softmax_csv[1]))
 
 total = len(test_label)
