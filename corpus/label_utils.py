@@ -21,10 +21,3 @@ class LabelUtils(object):
                 label, index = l.split("__label__")
                 label_index_map[label.strip()] = int(index.strip())
         return label_index_map
-
-
-if __name__ == "__main__":
-    LabelUtils.build_label_index(input_file="data/label/20180130_14_26_31_category.csv",
-                                 output_file="data/label/label_index.csv")
-    label_map = LabelUtils.build_label_map("data/label/label_index.csv")
-    print(label_map)
