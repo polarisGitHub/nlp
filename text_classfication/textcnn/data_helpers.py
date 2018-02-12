@@ -10,10 +10,11 @@ def load_data_and_labels(file, num_class):
     examples = list(codecs.open(file, "r", encoding="utf-8").readlines())
     x, y = [], []
     for item in examples:
-        data, label = item.split("__label__")
-        onehot = int(label.rstrip("\n"))
+        data, labels = item.split("\t")
         value = [0 for _ in range(num_class)]
-        value[onehot] = 1
+        onehots = labels.replace("__label__", "").split(",")
+        for onehot in onehots:
+            value[int(onehot.strip())] = 1
         x.append(data.rstrip("\t"))
         y.append(value)
     return [np.array(x), np.array(y)]
