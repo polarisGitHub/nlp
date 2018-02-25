@@ -13,8 +13,3 @@ def find_files(root):
         else:
             files.append(path)
     return files
-
-
-if __name__ == "__main__":
-    txt = find_files("../data/2014")
-    print(len(txt), txt[0])

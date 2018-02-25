@@ -11,4 +11,4 @@ def process(sentence):
                                            full_half_converter.FH_NUM,
                                            full_half_converter.FH_SPACE)
     return list(filter(lambda sentence: sentence != "",
-                       map(lambda sentence: sentence.strip(), re.split("[,，.。!！?？、;；]", sentence))))
+                       map(lambda sentence: sentence.strip(), re.split("[,，.。!！?？;；]", sentence))))

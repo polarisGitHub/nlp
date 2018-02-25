@@ -7,8 +7,8 @@ import codecs
 from utils import file_walker
 from utils import pre_seg
 
+sentences = []
 print("开始处理")
-grouped = {}
 for file in file_walker.find_files(os.getcwd() + "/data/2014"):
     with codecs.open(file, "r", encoding="utf-8") as f:
         words = re.findall(
@@ -16,14 +16,10 @@ for file in file_walker.find_files(os.getcwd() + "/data/2014"):
             f.readline().strip())
         pre_process_sentence = pre_seg.process(" ".join(words))  # 按标点预分割
         for sentence in pre_process_sentence:
-            cnt = len(sentence.split(" "))
-            if cnt not in grouped:
-                grouped[cnt] = []
-            grouped[cnt].append(sentence)
+            sentences.append(sentence)
 print("处理完毕")
 
 print("开始写文件")
-for cnt, sentence in grouped.items():
-    with codecs.open("data/2014_process/" + str(cnt) + ".txt", "w", encoding="utf-8") as f:
-        f.write("\r".join(sentence))
+with codecs.open("data/2014_process/word_cut.txt", "w", encoding="utf-8") as f:
+    f.write("\r".join(sentences))
 print("写文件完毕")

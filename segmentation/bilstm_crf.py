@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import math
 import numpy as np
 import tensorflow as tf
 
 
 class BILSTM_CRF(object):
-    def __init__(self, num_classes, hidden_size=128, num_layers=2, batch_size=64,
+    def __init__(self, num_classes, hidden_size=128, num_layers=2, batch_size=32,
                  rnn_cell=tf.contrib.rnn.BasicLSTMCell,
                  embedding_matrix=None, vocab_size=None, embedding_size=None):
         # Parameter
@@ -71,7 +70,7 @@ class BILSTM_CRF(object):
 
             self.observations = tf.concat(1, [begin_vec, self.observations, end_vec])
 
-            self.mask = tf.cast(tf.reshape(tf.sign(self.targets), [self.batch_size * self.num_steps]), tf.float32)
+            self.mask = tf.cast(tf.reshape(tf.sign(self.targets), [self.batch_size * self.sample_length]), tf.float32)
 
             # point score
             self.point_score = tf.gather(tf.reshape(self.tags_scores, [-1]),
