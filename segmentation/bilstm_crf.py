@@ -7,12 +7,10 @@ import tensorflow as tf
 class BILSTM_CRF(object):
     def __init__(self, num_classes, hidden_size=128, num_layers=2, batch_size=32,
                  rnn_cell=tf.contrib.rnn.BasicLSTMCell,
-                 embedding_matrix=None, vocab_size=None, embedding_size=None):
+                 embedding_matrix=None):
         # Parameter
         self.num_layers = num_layers
-        self.embedding_size = embedding_size
         self.hidden_size = hidden_size
-        self.vocab_size = vocab_size
         self.num_classes = num_classes
         self.batch_size = batch_size
 
@@ -22,12 +20,10 @@ class BILSTM_CRF(object):
         self.targets_transition = tf.placeholder(tf.int32, [None])
         self.sequence_length = tf.placeholder(shape=[None, ], dtype=tf.int32, name="sequence_length")
 
+        # 需要预训练词向量
         # [batch_size,timestamp_size,hidden_size]
         with tf.device('/cpu:0'), tf.name_scope("embedding"):
-            if embedding_matrix is not None:
-                self.W = tf.Variable(embedding_matrix, name="w", dtype=tf.float32)
-            else:
-                self.W = tf.Variable(tf.random_uniform([self.vocab_size, self.embedding_size], -1.0, 1.0), name="w")
+            self.W = tf.Variable(embedding_matrix, name="w", dtype=tf.float32)
             self.embedding = tf.nn.embedding_lookup(self.W, self.inputs, name="lookup")
 
         with tf.name_scope("birnn"):

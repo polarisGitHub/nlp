@@ -2,57 +2,56 @@
 
 
 class Tag4(object):
-    @staticmethod
-    def get_mapping():
+    def get_mapping(self):
         return {"S": 0, "B": 1, "M": 2, "E": 3}
 
     # S表示单字，B表示词首，M表示词中，E表示词尾
-    @staticmethod
-    def tag(word):
+    def tag(self, sentence):
+        ret = []
+        for word in sentence.strip().split(" "):
+            ret.extend(self.__do_tag(word))
+        return ret
+
+    def __do_tag(self, word):
         if len(word) == 1:
-            return [Tag4.get_mapping()["S"]]
+            return [self.get_mapping()["S"]]
         else:
-            ret = [Tag4.get_mapping()["B"]]
+            ret = [self.get_mapping()["B"]]
             for _ in range(len(word[1:-1])):
-                ret.append(Tag4.get_mapping()["M"])
-            ret.append(Tag4.get_mapping()["E"])
+                ret.append(self.get_mapping()["M"])
+            ret.append(self.get_mapping()["E"])
             return ret
 
 
 class Tag6(object):
-    @staticmethod
-    def get_mapping():
+    def get_mapping(self):
         return {"S": 0, "B": 1, "C": 2, "D": 3, "M": 4, "E": 5}
 
+    def tag(self, sentence):
+        ret = []
+        for word in sentence.strip().split(" "):
+            ret.extend(self.__do_tag(word))
+        return ret
+
     # S表示单字，B表示词首，C表示词中第一个，D表示词中第二个，M表示词中第三个及以后，E表示词尾
-    @staticmethod
-    def tag(word):
+    def __do_tag(self, word):
         if len(word) == 1:
-            return [Tag6.get_mapping()["S"]]
+            return [self.get_mapping()["S"]]
         elif len(word) == 2:
-            return [Tag6.get_mapping()["B"], Tag6.get_mapping()["E"]]
+            return [self.get_mapping()["B"], self.get_mapping()["E"]]
         elif len(word) == 3:
-            return [Tag6.get_mapping()["B"], Tag6.get_mapping()["C"], Tag6.get_mapping()["E"]]
+            return [self.get_mapping()["B"], self.get_mapping()["C"], self.get_mapping()["E"]]
         else:
-            ret = [Tag6.get_mapping()["B"], Tag6.get_mapping()["C"], Tag6.get_mapping()["D"]]
+            ret = [self.get_mapping()["B"], self.get_mapping()["C"], self.get_mapping()["D"]]
             for _ in range(len(word[3:-1])):
-                ret.append(Tag6.get_mapping()["M"])
-            ret.append(Tag6.get_mapping()["E"])
+                ret.append(self.get_mapping()["M"])
+            ret.append(self.get_mapping()["E"])
             return ret
 
 
 if __name__ == "__main__":
     print("tag4")
-    print(Tag4.tag("1"))
-    print(Tag4.tag("12"))
-    print(Tag4.tag("123"))
-    print(Tag4.tag("1234"))
+    print(Tag4().tag("1 12 123 1234"))
 
     print("tag6")
-    print(Tag6.tag("1"))
-    print(Tag6.tag("12"))
-    print(Tag6.tag("123"))
-    print(Tag6.tag("1234"))
-    print(Tag6.tag("12345"))
-    print(Tag6.tag("123456"))
-
+    print(Tag6().tag("1 12 123 1234 12345 123456"))
