@@ -34,7 +34,7 @@ class DateIterator(object):
         Generates a batch iterator for a dataset.
         """
         for _ in range(num_epochs):
-            self.__init_epochs()  # 每个epochs开始前初始化数据
+            self.__init_epochs(batch_size)  # 每个epochs开始前初始化数据
             while self.__has_bucket_epochs(batch_size):  # 是否一个epochs执行完了，每个bucket都执行过了
                 bucket_id = self.__find_bucket_id()  # 随机一个bucket_id
                 sentences, labels = self.buckets[bucket_id]["sentences"], self.buckets[bucket_id]["labels"]
@@ -52,23 +52,26 @@ class DateIterator(object):
             if end_index <= bucket_size:
                 return True
             else:
-                del self.buckets[bucket_id]
+                self.buckets.pop(bucket_id)
         return False
 
-    def __init_epochs(self):
+    def __init_epochs(self, batch_size):
         for bucket_id, bucket in self.buckets_raw.items():
-            self.buckets[bucket_id] = {
-                "sentences": np.array(self.buckets_raw[bucket_id]["sentences"]),
-                "labels": np.array(self.buckets_raw[bucket_id]["labels"])
-            }
-            # 打乱顺序
             bucket_size = len(bucket["sentences"])
-            shuffle_indices = np.random.permutation(np.arange(bucket_size))
-            self.buckets[bucket_id]["sentences"] = self.buckets[bucket_id]["sentences"][shuffle_indices]
-            self.buckets[bucket_id]["labels"] = self.buckets[bucket_id]["labels"][shuffle_indices]
-            # 初始化bucket参数
-            self.buckets[bucket_id]["bucket_size"] = bucket_size
-            self.buckets[bucket_id]["bucket_batch_num"] = -1
+            if bucket_size >= batch_size:  # bucket大于batch_size的才进入计算
+                self.buckets[bucket_id] = {
+                    "sentences": np.array(self.buckets_raw[bucket_id]["sentences"]),
+                    "labels": np.array(self.buckets_raw[bucket_id]["labels"])
+                }
+                # 打乱顺序
+                shuffle_indices = np.random.permutation(np.arange(bucket_size))
+                self.buckets[bucket_id]["sentences"] = self.buckets[bucket_id]["sentences"][shuffle_indices]
+                self.buckets[bucket_id]["labels"] = self.buckets[bucket_id]["labels"][shuffle_indices]
+                # 初始化bucket参数
+                self.buckets[bucket_id]["bucket_size"] = bucket_size
+                self.buckets[bucket_id]["bucket_batch_num"] = -1
+            else:
+                print(bucket_id, bucket_size)
 
     def __find_bucket_id(self):
         bucket_ids = self.buckets.keys()
@@ -77,5 +80,5 @@ class DateIterator(object):
 
 if __name__ == "__main__":
     piple = DateIterator("data/2014_process/word_cut.txt", "data/2014_process/char_cut.w2v.txt", tag.Tag4())
-    iter = piple.batch_iter(1, 1)
-    print(next(iter))
+    iter = piple.batch_iter(32, 1)
+    next(iter)
