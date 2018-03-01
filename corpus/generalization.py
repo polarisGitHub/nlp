@@ -46,6 +46,6 @@ index = 0
 with codecs.open(options.input, "r", encoding="utf-8") as r:
     with codecs.open(options.output, "w", encoding="utf-8") as w:
         for line in r:
-            w.write(replace(line))
+            w.write(replace(line.lower()))
             index += 1
             print(index)
