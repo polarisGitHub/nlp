@@ -62,7 +62,10 @@ def main(_):
         print("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
     elif FLAGS.embedding_type == "none-static":
         x, w2v = [], KeyedVectors.load_word2vec_format(FLAGS.word2vec_model, binary=False)
+        vocab, embeddings = w2v.vocab, np.zeros((len(w2v.index2word), w2v.vector_size), dtype=np.float32)
 
+        for k, v in vocab.items():
+            embeddings[v.index] = w2v[k]
         for item in x_text:
             x.append([w2v.vocab[word].index if word in w2v.vocab else w2v.vocab["__UNK__"].index
                       for word in item.split(" ")])
