@@ -24,7 +24,7 @@ if options.output == "":
 # address
 regexes = {
     re.compile("(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]"): "URLTOKEN",
-    re.compile("\d{4}(-|/|.|年)\d{1,2}(-|/|.|月)\d{1,2}(-|/|.|日)?"): "DATETOKEN",
+    re.compile("\d{4}([-/年])\d{1,2}([-/月])\d{1,2}([-/日])?"): "DATETOKEN",
     re.compile("\d{17}[\d|x]|\d{15}"): "IDCARDTOKEN",
     re.compile("jd_[\d\w/*]*"): "PINTOKEN",
     re.compile("#E-s(\d)+"): "STICKERTOKEN",
