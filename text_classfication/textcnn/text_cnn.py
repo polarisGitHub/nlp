@@ -44,7 +44,7 @@ class TextCNN(object):
                     padding="VALID",
                     name="conv")
                 # Apply nonlinearity
-                h = tf.nn.relu(tf.nn.bias_add(conv, b), name="relu")
+                h = tf.nn.elu(tf.nn.bias_add(conv, b), name="relu")
                 # Maxpooling over the outputs
                 pooled = tf.nn.max_pool(
                     h,
