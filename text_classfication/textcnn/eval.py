@@ -111,8 +111,8 @@ def main(_):
         csv.writer(f).writerows(predictions_human_readable)
 
     # Save the softmax to a csv
-    softmax_human_readable = np.column_stack((np.array(x_raw), list(all_softmax_str)))
-    out_path = os.path.join(FLAGS.checkpoint_dir, "..", "softmax.csv")
+    softmax_human_readable = np.column_stack((np.array(x_raw), np.array(y_test), list(all_softmax_str)))
+    out_path = os.path.join(FLAGS.checkpoint_dir, "..", "softmax_t.csv")
     print("Saving softmax to {0}".format(out_path))
     with codecs.open(out_path, 'w', encoding="utf-8") as f:
         csv.writer(f).writerows(softmax_human_readable)
