@@ -24,6 +24,6 @@ class WordCut(object):
 
 
 if __name__ == "__main__":
-    seg = WordCut(user_dict="dict/sougou.dict,dict/sougou-finance.dict,dict/user.dict",
+    seg = WordCut(user_dict="dict/sougou.dict,dict/sougou-finance.dict,dict/user.dict,dict/token.txt",
                   stop_dict="dict/stopwords.txt")
     print(seg.seg("太阳当空照"))
