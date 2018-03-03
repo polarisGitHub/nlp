@@ -1,9 +1,11 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea/
 __pycache__/
-data/
 .DS_Store
-text_classfication/textcnn/runs/
+
+data/
 model/
+w2v/
+runs/
+
 user.dict
-text_classfication/textrnn/runs/
