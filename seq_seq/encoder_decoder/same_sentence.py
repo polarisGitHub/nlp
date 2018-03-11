@@ -18,7 +18,12 @@ tf.flags.DEFINE_string("sentence", "", "Checkpoint directory from training run")
 FLAGS = tf.flags.FLAGS
 
 w2v = KeyedVectors.load_word2vec_format(FLAGS.word2vec_model, binary=False)
-sentence_index = [w2v.vocab[word].index if word in w2v.vocab else w2v.vocab["__UNK__"].index for word in
+index_word_map, word_index_map = {}, {}
+for word, vocab in w2v.vocab.items():
+    index_word_map[vocab.index] = word
+    word_index_map[word] = vocab.index
+
+sentence_index = [word_index_map[word] if word in word_index_map else word_index_map["__UNK__"].index for word in
                   FLAGS.sentence.split(" ")]
 
 
@@ -47,6 +52,10 @@ def main(_):
                                                          decoder_inputs: [sentence_index],
                                                          sequence_length: [len(sentence_index)]})
             print(sentence_index, prediction, a)
+            prediction_sentence = ""
+            for index in prediction[0]:
+                prediction_sentence += index_word_map[index]
+            print(prediction_sentence)
 
 
 if __name__ == "__main__":
