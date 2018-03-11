@@ -13,12 +13,12 @@ from encoder_decoder import EncoderDecoder
 
 print('TensorFlow Version: {}'.format(tf.__version__))
 
-tf.flags.DEFINE_string("data_file", "data/sentence.csv", "Data source for the train.")
-tf.flags.DEFINE_string("word2vec_model", "w2v/corpus.w2v.txt", "word2vec_model which train by gensim")
+tf.flags.DEFINE_string("data_file", "", "Data source for the train.")
+tf.flags.DEFINE_string("word2vec_model", "", "word2vec_model which train by gensim")
 
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 tf.flags.DEFINE_integer("num_epochs", 20, "Number of training epochs (default: 200)")
-tf.flags.DEFINE_integer("checkpoint_every", 10, "Save model after this many steps (default: 100)")
+tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
 tf.flags.DEFINE_integer("num_checkpoints", 1, "Number of checkpoints to store (default: 5)")
 
 FLAGS = tf.flags.FLAGS
