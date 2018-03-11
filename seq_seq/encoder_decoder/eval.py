@@ -9,7 +9,7 @@ from gensim.models.keyedvectors import KeyedVectors
 # ==================================================
 
 # Data Parameters
-tf.flags.DEFINE_string("word2vec_model", "w2v/corpus.w2v.txt", "word2vec_model which train with gensim")
+tf.flags.DEFINE_string("word2vec_model", "", "word2vec_model which train with gensim")
 
 # Eval Parameters
 tf.flags.DEFINE_string("checkpoint_dir", "", "Checkpoint directory from training run")
