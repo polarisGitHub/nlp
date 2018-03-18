@@ -19,6 +19,7 @@ tf.flags.DEFINE_string("w2v_model", "w2v/char_cut.w2v.txt", "word2vec_model whic
 tf.flags.DEFINE_string("tag", "tag4", "use tag4 or tag6")
 
 # Model Hyperparameters
+tf.flags.DEFINE_integer("max_sequence_length", 100, "Data source for the train.")
 tf.flags.DEFINE_integer("hidden_size", 128, "rnn hidden size (default: 128)")
 tf.flags.DEFINE_integer("num_layers", 2, "multi rnn layer (default: '2')")
 tf.flags.DEFINE_string("rnn_cell", "lstm", "lstm or gur")
@@ -44,10 +45,12 @@ def main(_):
 
     # Load data
     if FLAGS.tag == "tag4":
-        data_iter = DateIterator(FLAGS.train_file, FLAGS.w2v_model, tag.Tag4())
+        data_iter = DateIterator(file=FLAGS.train_file, vocab_path=FLAGS.w2v_model, tag_processor=tag.Tag4(),
+                                 max_sequence_length=FLAGS.max_sequence_length)
         num_classes = 4
-    elif FLAGS.tag == "tag4":
-        data_iter = DateIterator(FLAGS.train_file, FLAGS.w2v_model, tag.Tag6())
+    elif FLAGS.tag == "tag6":
+        data_iter = DateIterator(file=FLAGS.train_file, vocab_path=FLAGS.w2v_model, tag_processor=tag.Tag6(),
+                                 max_sequence_length=FLAGS.max_sequence_length)
         num_classes = 6
     else:
         raise ValueError(FLAGS.tag + "not support")
@@ -71,9 +74,9 @@ def main(_):
         with sess.as_default():
             rnn = BIRNN_CRF(
                 num_classes=num_classes,
+                max_sequence_length=FLAGS.max_sequence_length,
                 hidden_size=FLAGS.hidden_size,
                 num_layers=FLAGS.num_layers,
-                batch_size=FLAGS.batch_size,
                 rnn_cell=rnn_cell,
                 embedding_matrix=data_iter.embedding_matrix
             )
@@ -83,16 +86,6 @@ def main(_):
             optimizer = tf.train.AdamOptimizer(1e-3)
             grads_and_vars = optimizer.compute_gradients(rnn.loss)
             train_op = optimizer.apply_gradients(grads_and_vars, global_step=global_step)
-
-            # Keep track of gradient values and sparsity (optional)
-            grad_summaries = []
-            for g, v in grads_and_vars:
-                if g is not None:
-                    grad_hist_summary = tf.summary.histogram("{}/grad/hist".format(v.name), g)
-                    sparsity_summary = tf.summary.scalar("{}/grad/sparsity".format(v.name), tf.nn.zero_fraction(g))
-                    grad_summaries.append(grad_hist_summary)
-                    grad_summaries.append(sparsity_summary)
-            grad_summaries_merged = tf.summary.merge(grad_summaries)
 
             # Output directory for models and summaries
             timestamp = str(int(time.time()))
@@ -104,7 +97,7 @@ def main(_):
             # acc_summary = tf.summary.scalar("accuracy", rnn.accuracy)
 
             # Train Summaries
-            train_summary_op = tf.summary.merge([loss_summary, grad_summaries_merged])
+            train_summary_op = tf.summary.merge([loss_summary])
             train_summary_dir = os.path.join(out_dir, "summaries", "train")
             train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
 
@@ -150,6 +143,7 @@ def main(_):
                     rnn.sequence_lengths: lengths_batch,
                     rnn.dropout_keep_prob: 1.0
                 }
+
                 step, summaries, loss, accuracy = sess.run(
                     [global_step, dev_summary_op, rnn.loss, rnn.accuracy],
                     feed_dict)
@@ -158,11 +152,10 @@ def main(_):
                 if writer:
                     writer.add_summary(summaries, step)
 
-            # Generate batches
-            batch_iter = data_iter.batch_iter(batch_size=FLAGS.batch_size, num_epochs=FLAGS.num_epochs)
-            while True:
-                batch_data, batch_labels, batch_lengths = next(batch_iter)
-                # Training loop. For each batch...
+            batches = data_iter.batch_iter(batch_size=FLAGS.batch_size, num_epochs=FLAGS.num_epochs)
+            for batch in batches:
+                batch_data, batch_labels, batch_lengths = zip(*batch)
+                # train
                 train_step(batch_data, batch_labels, batch_lengths)
                 current_step = tf.train.global_step(sess, global_step)
                 # 暂时没有test
