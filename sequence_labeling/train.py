@@ -102,7 +102,7 @@ def main(_):
             train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
 
             # Dev summaries
-            dev_summary_op = tf.summary.merge([loss_summary])
+            dev_summary_op = tf.summary.merge([loss_summary, acc_summary])
             dev_summary_dir = os.path.join(out_dir, "summaries", "dev")
             dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, sess.graph)
 
