@@ -13,7 +13,7 @@ from data_helpers import DateIterator
 # ==================================================
 
 # Data loading params
-tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
+tf.flags.DEFINE_float("dev_sample_percentage", .001, "Percentage of the training data to use for validation")
 tf.flags.DEFINE_string("train_file", "data/2014_process/word_cut.txt", "Data source for the train.")
 tf.flags.DEFINE_string("w2v_model", "w2v/char_cut.w2v.txt", "word2vec_model which train with gensim")
 tf.flags.DEFINE_string("tag", "tag4", "use tag4 or tag6")
@@ -30,7 +30,7 @@ tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 tf.flags.DEFINE_integer("num_epochs", 20, "Number of training epochs (default: 20)")
 tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
-tf.flags.DEFINE_integer("num_checkpoints", 1, "Number of checkpoints to store (default: 5)")
+tf.flags.DEFINE_integer("num_checkpoints", 5, "Number of checkpoints to store (default: 5)")
 
 # Misc Parameters
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
@@ -134,19 +134,22 @@ def main(_):
                 train_summary_writer.add_summary(summaries, step)
 
             def dev_step(x_batch, y_batch, lengths_batch, writer=None):
-                """
-                Evaluates model on a dev set
-                """
+                # 验证关闭gpu，免得显存炸了
+                CUDA_VISIBLE_DEVICES = os.environ["CUDA_VISIBLE_DEVICES"]
+
+                os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
                 feed_dict = {
                     rnn.input_x: x_batch,
                     rnn.input_y: y_batch,
                     rnn.sequence_lengths: lengths_batch,
                     rnn.dropout_keep_prob: 1.0
                 }
-
                 step, summaries, loss, accuracy = sess.run(
                     [global_step, dev_summary_op, rnn.loss, rnn.accuracy],
                     feed_dict)
+
+                os.environ["CUDA_VISIBLE_DEVICES"] = CUDA_VISIBLE_DEVICES
+
                 time_str = datetime.datetime.now().isoformat()
                 print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
                 if writer:
@@ -160,7 +163,7 @@ def main(_):
                 # train
                 train_step(batch_data, batch_labels, batch_lengths)
                 current_step = tf.train.global_step(sess, global_step)
-                if current_step % FLAGS.evaluate_every == 0:
+                if current_step % FLAGS.evaluate_every != 0:
                     print("\nEvaluation:")
                     dev_step(dev_data, dev_label, dev_lengths, writer=dev_summary_writer)
                     print("")
