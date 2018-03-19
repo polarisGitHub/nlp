@@ -143,7 +143,6 @@ def main(_):
                 step, summaries, loss, accuracy = sess.run(
                     [global_step, dev_summary_op, rnn.loss, rnn.accuracy],
                     feed_dict)
-
                 time_str = datetime.datetime.now().isoformat()
                 print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
                 if writer:
@@ -157,7 +156,7 @@ def main(_):
                 # train
                 train_step(batch_data, batch_labels, batch_lengths)
                 current_step = tf.train.global_step(sess, global_step)
-                if current_step % FLAGS.evaluate_every != 0:
+                if current_step % FLAGS.evaluate_every == 0:
                     print("\nEvaluation:")
                     dev_step(dev_data, dev_label, dev_lengths, writer=dev_summary_writer)
                     print("")
