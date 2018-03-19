@@ -13,7 +13,7 @@ from data_helpers import DateIterator
 # ==================================================
 
 # Data loading params
-tf.flags.DEFINE_float("dev_sample_percentage", .001, "Percentage of the training data to use for validation")
+tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
 tf.flags.DEFINE_string("train_file", "data/2014_process/word_cut.txt", "Data source for the train.")
 tf.flags.DEFINE_string("w2v_model", "w2v/char_cut.w2v.txt", "word2vec_model which train with gensim")
 tf.flags.DEFINE_string("tag", "tag4", "use tag4 or tag6")
