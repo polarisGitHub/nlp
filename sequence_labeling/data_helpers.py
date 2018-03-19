@@ -4,7 +4,8 @@ from gensim.models.keyedvectors import KeyedVectors
 
 
 class DateIterator(object):
-    def __init__(self, file=None, data=None, vocab_path=None, tag_processor=None, max_sequence_length=100):
+    def __init__(self, file=None, data=None, vocab_path=None, tag_processor=None, max_sequence_length=100,
+                 train_data_ratio=0.9):
         self.vocab_path = vocab_path
         self.tag_processor = tag_processor
         self.max_sequence_length = max_sequence_length
@@ -22,6 +23,7 @@ class DateIterator(object):
 
         if data is None:
             raise ValueError("data is None")
+
         # 获取转换数据
         padding_sentences, padding_labels, length = [], [], []
         for item in data:
@@ -33,12 +35,26 @@ class DateIterator(object):
             padding_labels.append(self.padding(label, 0, max_sequence_length))
             length.append(len(sentence) if len(sentence) < max_sequence_length else max_sequence_length)
 
-        self.data = list(zip(padding_sentences, padding_labels, length))
-        self.data_size = len(self.data)
-        del data
+        convert_data = np.array(list(zip(padding_sentences, padding_labels, length)))
 
-    def batch_iter(self, batch_size=64, num_epochs=100):
-        data = np.array(self.data)
+        # 划分训练集合测试集
+        np.random.seed()
+        convert_data = np.array(convert_data)
+        shuffle_indices = np.random.permutation(np.arange(len(convert_data)))
+        shuffled = convert_data[shuffle_indices]
+
+        dev_sample_index = int(train_data_ratio * float(len(data)))
+        self.train_data, self.dev_data = shuffled[:dev_sample_index], shuffled[dev_sample_index:]
+
+        del data, convert_data, shuffle_indices
+
+    def get_train_data(self):
+        return self.train_data
+
+    def get_dev_data(self):
+        return self.dev_data
+
+    def batch_iter(self, data, batch_size=64, num_epochs=100):
         data_size = len(data)
         num_batches_per_epoch = int((len(data) - 1) / batch_size) + 1
         for epoch in range(num_epochs):

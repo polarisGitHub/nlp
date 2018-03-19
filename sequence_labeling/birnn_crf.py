@@ -61,6 +61,12 @@ class BIRNN_CRF(object):
             viterbi_sequence, _ = tf.contrib.crf.crf_decode(self.scores, transition_params, self.sequence_lengths)
             self.outputs = tf.identity(viterbi_sequence, name="outputs")
 
+        with tf.name_scope("accuracy"):
+            correct = tf.equal(self.outputs, self.input_y)
+            mask = tf.sequence_mask(self.sequence_lengths)
+            mask_correct = tf.boolean_mask(correct, mask)
+            self.accuracy = tf.reduce_mean(tf.cast(mask_correct, "float"), name="accuracy")
+
     def rnn(self, rnn_cell, num_units, output_keep_prob):
         cell = rnn_cell(num_units)
         return tf.contrib.rnn.DropoutWrapper(cell=cell, output_keep_prob=output_keep_prob)

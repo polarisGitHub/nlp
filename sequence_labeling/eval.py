@@ -22,7 +22,7 @@ tf.flags.DEFINE_string("checkpoint_dir", "runs/1521393606/checkpoints", "Checkpo
 
 FLAGS = tf.flags.FLAGS
 
-data = ["工信处女干事每月经过下属科室都要亲口交代24口交换机等技术性器件的安装工作"]
+data = ["斯宾塞、“冰箱”弗里奇、贝瑟尼和玛莎是某高中的问题学生"]
 if FLAGS.tag == "tag4":
     data_iter = DateIterator(data=data, vocab_path=FLAGS.w2v_model, tag_processor=tag.Tag4(), )
 elif FLAGS.tag == "tag6":
