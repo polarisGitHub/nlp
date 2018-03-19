@@ -134,10 +134,6 @@ def main(_):
                 train_summary_writer.add_summary(summaries, step)
 
             def dev_step(x_batch, y_batch, lengths_batch, writer=None):
-                # 验证关闭gpu，免得显存炸了
-                CUDA_VISIBLE_DEVICES = os.environ["CUDA_VISIBLE_DEVICES"]
-
-                os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
                 feed_dict = {
                     rnn.input_x: x_batch,
                     rnn.input_y: y_batch,
@@ -147,8 +143,6 @@ def main(_):
                 step, summaries, loss, accuracy = sess.run(
                     [global_step, dev_summary_op, rnn.loss, rnn.accuracy],
                     feed_dict)
-
-                os.environ["CUDA_VISIBLE_DEVICES"] = CUDA_VISIBLE_DEVICES
 
                 time_str = datetime.datetime.now().isoformat()
                 print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
