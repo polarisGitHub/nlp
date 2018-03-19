@@ -10,7 +10,6 @@ from data_helpers import DateIterator
 # ==================================================
 
 # Data Parameters
-tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
 tf.flags.DEFINE_string("train_file", "data/2014_process/word_cut.txt", "Data source for the train.")
 tf.flags.DEFINE_string("w2v_model", "w2v/char_cut.w2v.txt", "word2vec_model which train with gensim")
 tf.flags.DEFINE_string("tag", "tag4", "use tag4 or tag6")
@@ -18,7 +17,7 @@ tf.flags.DEFINE_string("tag", "tag4", "use tag4 or tag6")
 # Eval Parameters
 
 tf.flags.DEFINE_integer("batch_size", 1, "Batch Size (default: 64)")
-tf.flags.DEFINE_string("checkpoint_dir", "runs/1521393606/checkpoints", "Checkpoint directory from training run")
+tf.flags.DEFINE_string("checkpoint_dir", "runs/1521471636/checkpoints", "Checkpoint directory from training run")
 
 FLAGS = tf.flags.FLAGS
 
@@ -58,7 +57,7 @@ def main(_):
                     for j in range(batch_lengths[i]):
                         tag = nn_outputs[i][j]
                         if tag == 0 or tag == 1:
-                            cut += " "
+                            cut += "/"
                         cut += data[i][j]
                     print(cut.strip())
 

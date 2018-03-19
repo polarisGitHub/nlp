@@ -27,7 +27,7 @@ tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (defau
 
 # Training parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("num_epochs", 20, "Number of training epochs (default: 200)")
+tf.flags.DEFINE_integer("num_epochs", 20, "Number of training epochs (default: 20)")
 tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
 tf.flags.DEFINE_integer("num_checkpoints", 1, "Number of checkpoints to store (default: 5)")
@@ -126,11 +126,11 @@ def main(_):
                     rnn.sequence_lengths: lengths_batch,
                     rnn.dropout_keep_prob: FLAGS.dropout_keep_prob
                 }
-                _, step, summaries, loss = sess.run(
-                    [train_op, global_step, train_summary_op, rnn.loss],
+                _, step, summaries, loss, acc = sess.run(
+                    [train_op, global_step, train_summary_op, rnn.loss, rnn.accuracy],
                     feed_dict)
                 time_str = datetime.datetime.now().isoformat()
-                print("{}: step {}, loss {:g}".format(time_str, step, loss))
+                print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, acc))
                 train_summary_writer.add_summary(summaries, step)
 
             def dev_step(x_batch, y_batch, lengths_batch, writer=None):
