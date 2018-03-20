@@ -17,15 +17,15 @@ tf.flags.DEFINE_string("tag", "tag4", "use tag4 or tag6")
 # Eval Parameters
 
 tf.flags.DEFINE_integer("batch_size", 1, "Batch Size (default: 64)")
-tf.flags.DEFINE_string("checkpoint_dir", "runs/1521471636/checkpoints", "Checkpoint directory from training run")
+tf.flags.DEFINE_string("checkpoint_dir", "runs/lstm2/checkpoints", "Checkpoint directory from training run")
 
 FLAGS = tf.flags.FLAGS
 
 data = ["斯宾塞、“冰箱”弗里奇、贝瑟尼和玛莎是某高中的问题学生"]
 if FLAGS.tag == "tag4":
-    data_iter = DateIterator(data=data, vocab_path=FLAGS.w2v_model, tag_processor=tag.Tag4(), )
+    data_iter = DateIterator(data=data, vocab_path=FLAGS.w2v_model, tag_processor=tag.Tag4(), train_data_ratio=1)
 elif FLAGS.tag == "tag6":
-    data_iter = DateIterator(data=data, vocab_path=FLAGS.w2v_model, tag_processor=tag.Tag6(), )
+    data_iter = DateIterator(data=data, vocab_path=FLAGS.w2v_model, tag_processor=tag.Tag6(), train_data_ratio=1)
 else:
     raise ValueError(FLAGS.tag + "not support")
 
@@ -46,7 +46,7 @@ def main(_):
             outputs = graph.get_operation_by_name("crf/outputs").outputs[0]
 
             # Collect the predictions here
-            batches = data_iter.batch_iter(batch_size=1, num_epochs=1)
+            batches = data_iter.batch_iter(data_iter.get_train_data(), batch_size=1, num_epochs=1)
             for batch in batches:
                 batch_data, batch_labels, batch_lengths = zip(*batch)
                 nn_outputs = sess.run(outputs, feed_dict={inpux_x: batch_data,
@@ -57,7 +57,7 @@ def main(_):
                     for j in range(batch_lengths[i]):
                         tag = nn_outputs[i][j]
                         if tag == 0 or tag == 1:
-                            cut += "/"
+                            cut += "\n"
                         cut += data[i][j]
                     print(cut.strip())
 
