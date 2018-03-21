@@ -38,7 +38,7 @@ class DateIterator(object):
         convert_data = np.array(list(zip(padding_sentences, padding_labels, length)))
 
         # 划分训练集合测试集
-        np.random.seed()
+        np.random.seed(42)
         convert_data = np.array(convert_data)
         shuffle_indices = np.random.permutation(np.arange(len(convert_data)))
         shuffled = convert_data[shuffle_indices]
