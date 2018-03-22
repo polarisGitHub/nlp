@@ -12,11 +12,11 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 parser = OptionParser("usage: %prog [options] arg1 arg2")
 parser.add_option("-i", "--input",
                   dest="input",
-                  default="",
+                  default="data/char_cut_processed.txt",
                   help="input file")
 parser.add_option("-m", "--model",
                   dest="model",
-                  default="",
+                  default="model/1.w2v",
                   help="save model")
 (options, args) = parser.parse_args()
 
@@ -30,4 +30,4 @@ word = pipe_line.SplitWord([options.input])
 # 输入是带__UNK__的，min_count设为1
 model = gensim.models.Word2Vec(word, min_count=1, sg=1, hs=1, size=128, workers=cpu_count())
 model.save(options.model)
-model.wv.save_word2vec_format(options.model + ".txt", binary=False)
+model.wv.save_word2vec_format(options.model + ".txt", fvocab=options.model + ".vocab", binary=False)

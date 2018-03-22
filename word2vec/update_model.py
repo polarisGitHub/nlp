@@ -35,4 +35,4 @@ model.build_vocab(word, update=True)
 model.train(word, total_examples=model.corpus_count, epochs=model.iter)
 
 model.save(options.new_model)
-model.wv.save_word2vec_format(options.new_model + ".txt", binary=False)
+model.wv.save_word2vec_format(options.new_model + ".txt", fvocab=options.new_model + ".vocab", binary=False)
