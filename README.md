@@ -14,9 +14,11 @@
 - sequence_labeling
     - 中文分词
     - 命名实体识别
-- text_classfication
+- text_classification
     - bayes
     - fasttext
     - textcnn
     - textrnn
     - textrcnn
+- seq_seq
+    - seq_seq

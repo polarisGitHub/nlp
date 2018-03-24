@@ -12,7 +12,7 @@ print("开始处理")
 for file in file_walker.find_files(os.getcwd() + "/data/2014"):
     with codecs.open(file, "r", encoding="utf-8") as f:
         words = re.findall(
-            "([\u3002\uff1b\uff0c\uff1a\u201c\u201d\uff08\uff09\u3001\uff1f\u300a\u300b\u4e00-\u9fa5\w]+)/[a-z]+",
+            "([\u3002\uff1b\uff0c\uff1a\u201c\u201d\uff08\uff09\u3001\uff1f\u300a\u300b\u4e00-\u9fa5\w]+)/[a-z0-9]+",
             f.readline().strip())
         pre_process_sentence = pre_seg.process(" ".join(words))  # 按标点预分割
         # 获取分词数据，空格分隔
