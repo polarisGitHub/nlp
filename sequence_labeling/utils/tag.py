@@ -13,12 +13,12 @@ class Tag4(object):
         return ret
 
     def __do_tag(self, word):
+        word_len = len(word)
         if len(word) == 1:
             return [self.get_mapping()["S"]]
         else:
             ret = [self.get_mapping()["B"]]
-            for _ in range(len(word[1:-1])):
-                ret.append(self.get_mapping()["M"])
+            ret.extend([self.get_mapping()["M"]] * (word_len - 2))
             ret.append(self.get_mapping()["E"])
             return ret
 
@@ -35,16 +35,16 @@ class Tag6(object):
 
     # S表示单字，B表示词首，C表示词中第一个，D表示词中第二个，M表示词中第三个及以后，E表示词尾
     def __do_tag(self, word):
-        if len(word) == 1:
+        word_len = len(word)
+        if word_len == 1:
             return [self.get_mapping()["S"]]
-        elif len(word) == 2:
+        elif word_len == 2:
             return [self.get_mapping()["B"], self.get_mapping()["E"]]
-        elif len(word) == 3:
+        elif word_len == 3:
             return [self.get_mapping()["B"], self.get_mapping()["C"], self.get_mapping()["E"]]
         else:
             ret = [self.get_mapping()["B"], self.get_mapping()["C"], self.get_mapping()["D"]]
-            for _ in range(len(word[3:-1])):
-                ret.append(self.get_mapping()["M"])
+            ret.extend([self.get_mapping()["M"]] * (word_len - 4))
             ret.append(self.get_mapping()["E"])
             return ret
 

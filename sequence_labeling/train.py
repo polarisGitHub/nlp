@@ -3,6 +3,8 @@
 import os
 import time
 import datetime
+import random
+import numpy as np
 import tensorflow as tf
 
 from utils import tag
@@ -14,8 +16,10 @@ from data_helpers import DateIterator
 
 # Data loading params
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
-tf.flags.DEFINE_string("train_file", "data/2014_process/word_cut.txt", "Data source for the train.")
-tf.flags.DEFINE_string("w2v_model", "w2v/char_cut.w2v.txt", "word2vec_model which train with gensim")
+tf.flags.DEFINE_integer("dev_size", 10000, "if 0, use all dev smaple, or use dev_size")
+
+tf.flags.DEFINE_string("train_file", "data/word_cut", "Data source for the train.")
+tf.flags.DEFINE_string("w2v_model", "w2v/char.w2v.txt", "word2vec_model which train with gensim")
 tf.flags.DEFINE_string("tag", "tag4", "use tag4 or tag6")
 
 # Model Hyperparameters
@@ -44,6 +48,7 @@ def main(_):
     # ==================================================
 
     # Load data
+    print("loading data")
     if FLAGS.tag == "tag4":
         data_iter = DateIterator(file=FLAGS.train_file, vocab_path=FLAGS.w2v_model, tag_processor=tag.Tag4(),
                                  max_sequence_length=FLAGS.max_sequence_length)
@@ -54,6 +59,8 @@ def main(_):
         num_classes = 6
     else:
         raise ValueError(FLAGS.tag + "not support")
+
+    print("loading data done")
 
     if FLAGS.rnn_cell == "lstm":
         rnn_cell = tf.nn.rnn_cell.BasicLSTMCell
@@ -134,10 +141,16 @@ def main(_):
                 train_summary_writer.add_summary(summaries, step)
 
             def dev_step(x_batch, y_batch, lengths_batch, writer=None):
+                input_x, input_y, sequence_lengths = x_batch, y_batch, lengths_batch
+                if FLAGS.dev_size != 0 and FLAGS.dev_size < len(x_batch):
+                    input_x = input_x[0:FLAGS.dev_size]
+                    input_y = input_y[0:FLAGS.dev_size]
+                    sequence_lengths = sequence_lengths[0:FLAGS.dev_size]
+
                 feed_dict = {
-                    rnn.input_x: x_batch,
-                    rnn.input_y: y_batch,
-                    rnn.sequence_lengths: lengths_batch,
+                    rnn.input_x: data_iter.padding_batch(input_x, FLAGS.max_sequence_length),
+                    rnn.input_y: data_iter.padding_batch(input_y, FLAGS.max_sequence_length),
+                    rnn.sequence_lengths: sequence_lengths,
                     rnn.dropout_keep_prob: 1.0
                 }
                 step, summaries, loss, accuracy = sess.run(
@@ -150,9 +163,10 @@ def main(_):
 
             batches = data_iter.batch_iter(data_iter.get_train_data(), batch_size=FLAGS.batch_size,
                                            num_epochs=FLAGS.num_epochs)
-            dev_data, dev_label, dev_lengths = zip(*data_iter.get_dev_data())
+            dev_data, dev_label, dev_lengths = data_iter.expand_buckets(data_iter.get_dev_data())
             for batch in batches:
-                batch_data, batch_labels, batch_lengths = zip(*batch)
+                batch_data, batch_labels, batch_lengths = data_iter.expand_padding_batch(batch,
+                                                                                         FLAGS.max_sequence_length)
                 # train
                 train_step(batch_data, batch_labels, batch_lengths)
                 current_step = tf.train.global_step(sess, global_step)
