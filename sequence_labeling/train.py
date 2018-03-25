@@ -16,10 +16,10 @@ from data_helpers import DateIterator
 
 # Data loading params
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
-tf.flags.DEFINE_integer("dev_size", 10000, "if 0, use all dev smaple, or use dev_size")
+tf.flags.DEFINE_integer("dev_size", 0, "if 0, use all dev sample, or use dev_size")
 
-tf.flags.DEFINE_string("train_file", "data/word_cut", "Data source for the train.")
-tf.flags.DEFINE_string("w2v_model", "w2v/char.w2v.txt", "word2vec_model which train with gensim")
+tf.flags.DEFINE_string("train_file", "", "Data source for the train.")
+tf.flags.DEFINE_string("w2v_model", "", "word2vec_model which train with gensim")
 tf.flags.DEFINE_string("tag", "tag4", "use tag4 or tag6")
 
 # Model Hyperparameters
