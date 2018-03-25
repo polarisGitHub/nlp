@@ -18,8 +18,8 @@ from data_helpers import DateIterator
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
 tf.flags.DEFINE_integer("dev_size", 0, "if 0, use all dev sample, or use dev_size")
 
-tf.flags.DEFINE_string("train_file", "data/1", "Data source for the train.")
-tf.flags.DEFINE_string("w2v_model", "w2v/char.w2v.txt", "word2vec_model which train with gensim")
+tf.flags.DEFINE_string("train_file", "", "Data source for the train.")
+tf.flags.DEFINE_string("w2v_model", "", "word2vec_model which train with gensim")
 tf.flags.DEFINE_string("tag", "tag4", "use tag4 or tag6")
 
 # Model Hyperparameters
@@ -32,7 +32,7 @@ tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (defau
 # Training parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 tf.flags.DEFINE_integer("num_epochs", 20, "Number of training epochs (default: 20)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
+tf.flags.DEFINE_integer("evaluate_every", 10, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
 tf.flags.DEFINE_integer("num_checkpoints", 5, "Number of checkpoints to store (default: 5)")
 
@@ -148,8 +148,8 @@ def main(_):
                     input_y = input_y[0:dev_size]
                     sequence_lengths = sequence_lengths[0:dev_size]
                 step, cnt, summary_loss, summary_accuracy = 0, 0, 0, 0
-                for i in range(0, dev_batch_size, len(input_x)):
-                    start, end = i * dev_batch_size, min((i + 1) * dev_batch_size, len(input_x))
+                for i in range(0, len(input_x), dev_batch_size):
+                    start, end = i, min(i + dev_batch_size, len(input_x))
                     feed_dict = {
                         rnn.input_x: data_iter.padding_batch(input_x[start: end], FLAGS.max_sequence_length),
                         rnn.input_y: data_iter.padding_batch(input_y[start: end], FLAGS.max_sequence_length),
