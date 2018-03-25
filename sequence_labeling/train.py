@@ -32,7 +32,7 @@ tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (defau
 # Training parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 tf.flags.DEFINE_integer("num_epochs", 20, "Number of training epochs (default: 20)")
-tf.flags.DEFINE_integer("evaluate_every", 10, "Evaluate model on dev set after this many steps (default: 100)")
+tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
 tf.flags.DEFINE_integer("num_checkpoints", 5, "Number of checkpoints to store (default: 5)")
 
@@ -109,7 +109,6 @@ def main(_):
             train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
 
             # Dev summaries
-            dev_summary_op = tf.summary.merge([loss_summary, acc_summary])
             dev_summary_dir = os.path.join(out_dir, "summaries", "dev")
             dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, sess.graph)
 
@@ -128,8 +127,8 @@ def main(_):
                 A single training step
                 """
                 feed_dict = {
-                    rnn.input_x: x_batch,
-                    rnn.input_y: y_batch,
+                    rnn.input_x: data_iter.padding_batch(x_batch, FLAGS.max_sequence_length),
+                    rnn.input_y: data_iter.padding_batch(y_batch, FLAGS.max_sequence_length),
                     rnn.sequence_lengths: lengths_batch,
                     rnn.dropout_keep_prob: FLAGS.dropout_keep_prob
                 }
@@ -171,8 +170,7 @@ def main(_):
                                            num_epochs=FLAGS.num_epochs)
             dev_data, dev_label, dev_lengths = zip(*data_iter.get_dev_data())
             for batch in batches:
-                batch_data, batch_labels, batch_lengths = data_iter.padding_zip_batch(batch,
-                                                                                      FLAGS.max_sequence_length)
+                batch_data, batch_labels, batch_lengths = zip(*batch)
                 # train
                 train_step(batch_data, batch_labels, batch_lengths)
                 current_step = tf.train.global_step(sess, global_step)

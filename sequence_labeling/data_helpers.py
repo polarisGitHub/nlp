@@ -39,7 +39,7 @@ class DateIterator(object):
 
             sentences.append(sentence)
             labels.append(label)
-            lengths.append(len(sentence))
+            lengths.append(min(len(sentence), self.max_sequence_length))
 
         print("tag data done")
 
@@ -57,15 +57,6 @@ class DateIterator(object):
 
     def get_dev_data(self):
         return self.test_data
-
-    def padding_zip_batch(self, data, max_sequence_len):
-        padding_sentences, padding_labels, real_lengths = [], [], []
-        sentences, labels, lengths = zip(*data)
-        for i in range(len(sentences)):
-            padding_sentences.append(self.padding(sentences[i], max_sequence_len))
-            padding_labels.append(self.padding(labels[i], max_sequence_len))
-            real_lengths.append(lengths[i])
-        return padding_sentences, padding_labels, real_lengths
 
     def padding_batch(self, data, max_sequence_len):
         padding = []
