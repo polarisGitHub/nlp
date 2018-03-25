@@ -141,12 +141,12 @@ def main(_):
                 train_summary_writer.add_summary(summaries, step)
 
             def dev_step(x_batch, y_batch, lengths_batch, writer=None):
-                dev_batch_size = 1024
+                dev_size, dev_batch_size = min(FLAGS.dev_size, len(x_batch)), 1024
                 input_x, input_y, sequence_lengths = x_batch, y_batch, lengths_batch
                 if FLAGS.dev_size != 0:
-                    input_x = input_x[0:FLAGS.dev_size]
-                    input_y = input_y[0:FLAGS.dev_size]
-                    sequence_lengths = sequence_lengths[0:FLAGS.dev_size]
+                    input_x = input_x[0:dev_size]
+                    input_y = input_y[0:dev_size]
+                    sequence_lengths = sequence_lengths[0:dev_size]
                 step, cnt, summary_loss, summary_accuracy = 0, 0, 0, 0
                 for i in range(0, dev_batch_size, len(input_x)):
                     start, end = i * dev_batch_size, min((i + 1) * dev_batch_size, len(input_x))
