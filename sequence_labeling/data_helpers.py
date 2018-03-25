@@ -58,7 +58,7 @@ class DateIterator(object):
             convert_data = np.array(list(zip(bucket["sentences"], bucket["labels"], bucket["lengths"])))
             shuffle_indices = np.random.permutation(np.arange(len(convert_data)))
             shuffled = convert_data[shuffle_indices]
-            dev_sample_index = int(train_data_ratio * float(len(bucket)))
+            dev_sample_index = int(train_data_ratio * float(len(bucket["sentences"])))
             self.bucket_train_data[bucket_id] = shuffled[:dev_sample_index]
             self.bucket_test_data[bucket_id] = shuffled[dev_sample_index:]
 
@@ -94,12 +94,13 @@ class DateIterator(object):
         return padding
 
     def batch_iter(self, data, batch_size=64, num_epochs=100):
-        for bucket_id, bucket in data.items():
-            bucket_size = len(bucket)
-            num_batches_per_epoch = int((bucket_size - 1) / batch_size) + 1
-            for epoch in range(num_epochs):
+        for epoch in range(num_epochs):
+            for bucket_id, bucket in data.items():
+                bucket_size = len(bucket)
+                num_batches_per_epoch = int((bucket_size - 1) / batch_size) + 1
                 shuffle_indices = np.random.permutation(np.arange(bucket_size))
                 shuffled_data = bucket[shuffle_indices]
+                print(bucket_id, bucket_size, num_batches_per_epoch)
                 for batch_num in range(num_batches_per_epoch):
                     start_index = batch_num * batch_size
                     end_index = min((batch_num + 1) * batch_size, bucket_size)
