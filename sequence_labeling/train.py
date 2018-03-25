@@ -18,8 +18,8 @@ from data_helpers import DateIterator
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
 tf.flags.DEFINE_integer("dev_size", 0, "if 0, use all dev sample, or use dev_size")
 
-tf.flags.DEFINE_string("train_file", "", "Data source for the train.")
-tf.flags.DEFINE_string("w2v_model", "", "word2vec_model which train with gensim")
+tf.flags.DEFINE_string("train_file", "data/1", "Data source for the train.")
+tf.flags.DEFINE_string("w2v_model", "w2v/char.w2v.txt", "word2vec_model which train with gensim")
 tf.flags.DEFINE_string("tag", "tag4", "use tag4 or tag6")
 
 # Model Hyperparameters
@@ -169,10 +169,10 @@ def main(_):
 
             batches = data_iter.batch_iter(data_iter.get_train_data(), batch_size=FLAGS.batch_size,
                                            num_epochs=FLAGS.num_epochs)
-            dev_data, dev_label, dev_lengths = data_iter.expand_buckets(data_iter.get_dev_data())
+            dev_data, dev_label, dev_lengths = zip(*data_iter.get_dev_data())
             for batch in batches:
-                batch_data, batch_labels, batch_lengths = data_iter.expand_padding_batch(batch,
-                                                                                         FLAGS.max_sequence_length)
+                batch_data, batch_labels, batch_lengths = data_iter.padding_zip_batch(batch,
+                                                                                      FLAGS.max_sequence_length)
                 # train
                 train_step(batch_data, batch_labels, batch_lengths)
                 current_step = tf.train.global_step(sess, global_step)
