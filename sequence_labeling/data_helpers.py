@@ -100,7 +100,6 @@ class DateIterator(object):
                 num_batches_per_epoch = int((bucket_size - 1) / batch_size) + 1
                 shuffle_indices = np.random.permutation(np.arange(bucket_size))
                 shuffled_data = bucket[shuffle_indices]
-                print(bucket_id, bucket_size, num_batches_per_epoch)
                 for batch_num in range(num_batches_per_epoch):
                     start_index = batch_num * batch_size
                     end_index = min((batch_num + 1) * batch_size, bucket_size)

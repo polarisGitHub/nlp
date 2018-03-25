@@ -18,8 +18,8 @@ from data_helpers import DateIterator
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
 tf.flags.DEFINE_integer("dev_size", 0, "if 0, use all dev sample, or use dev_size")
 
-tf.flags.DEFINE_string("train_file", "", "Data source for the train.")
-tf.flags.DEFINE_string("w2v_model", "", "word2vec_model which train with gensim")
+tf.flags.DEFINE_string("train_file", "data/1", "Data source for the train.")
+tf.flags.DEFINE_string("w2v_model", "w2v/char.w2v.txt", "word2vec_model which train with gensim")
 tf.flags.DEFINE_string("tag", "tag4", "use tag4 or tag6")
 
 # Model Hyperparameters
@@ -141,25 +141,31 @@ def main(_):
                 train_summary_writer.add_summary(summaries, step)
 
             def dev_step(x_batch, y_batch, lengths_batch, writer=None):
+                dev_batch_size = 1024
                 input_x, input_y, sequence_lengths = x_batch, y_batch, lengths_batch
-                if FLAGS.dev_size != 0 and FLAGS.dev_size < len(x_batch):
+                if FLAGS.dev_size != 0:
                     input_x = input_x[0:FLAGS.dev_size]
                     input_y = input_y[0:FLAGS.dev_size]
                     sequence_lengths = sequence_lengths[0:FLAGS.dev_size]
-
-                feed_dict = {
-                    rnn.input_x: data_iter.padding_batch(input_x, FLAGS.max_sequence_length),
-                    rnn.input_y: data_iter.padding_batch(input_y, FLAGS.max_sequence_length),
-                    rnn.sequence_lengths: sequence_lengths,
-                    rnn.dropout_keep_prob: 1.0
-                }
-                step, summaries, loss, accuracy = sess.run(
-                    [global_step, dev_summary_op, rnn.loss, rnn.accuracy],
-                    feed_dict)
-                time_str = datetime.datetime.now().isoformat()
-                print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
+                step, cnt, summary_loss, summary_accuracy = 0, 0, 0, 0
+                for i in range(0, dev_batch_size, len(input_x)):
+                    start, end = i * dev_batch_size, min((i + 1) * dev_batch_size, len(input_x))
+                    feed_dict = {
+                        rnn.input_x: data_iter.padding_batch(input_x[start: end], FLAGS.max_sequence_length),
+                        rnn.input_y: data_iter.padding_batch(input_y[start: end], FLAGS.max_sequence_length),
+                        rnn.sequence_lengths: sequence_lengths[start: end],
+                        rnn.dropout_keep_prob: 1.0
+                    }
+                    step, loss, accuracy = sess.run([global_step, rnn.loss, rnn.accuracy], feed_dict)
+                    cnt, summary_loss, summary_accuracy = cnt + 1, summary_loss + loss, summary_accuracy + accuracy
+                summary_loss, summary_accuracy = summary_loss / cnt, summary_accuracy / cnt
+                print("{}: step {}, loss {:g}, acc {:g}".format(datetime.datetime.now().isoformat(), step, summary_loss,
+                                                                summary_accuracy))
                 if writer:
-                    writer.add_summary(summaries, step)
+                    manual_summary = tf.Summary()
+                    manual_summary.value.add(tag="loss", simple_value=summary_loss)
+                    manual_summary.value.add(tag="accuracy_1", simple_value=summary_accuracy)
+                    writer.add_summary(manual_summary, step)
 
             batches = data_iter.batch_iter(data_iter.get_train_data(), batch_size=FLAGS.batch_size,
                                            num_epochs=FLAGS.num_epochs)
